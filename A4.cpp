@@ -61,6 +61,21 @@ Ray get_ray(
     return r;
 }
 
+Intersection hit( const Ray &ray, SceneNode *root ) {
+    Intersection i( ray );
+    for ( auto node : root->children ) {
+        if ( node->m_nodeType == NodeType::GeometryNode ) {
+            Intersection ii = node->intersect( ray );
+
+            if ( ii.hit && ( !i.hit || i.t < ii.t ) ) {
+                i = ii;
+            }
+        }
+
+    }
+    return i;
+}
+
 void A4_Render(
         // What to render
         SceneNode * root,
@@ -104,9 +119,13 @@ void A4_Render(
     auto d = calc_d( h, fovy );
     auto R3 = calc_R( up, eye, view );
     auto T4 = calc_T( eye );
+
     cout<<endl<<"R ( step 3 )"<< to_string(R3) <<endl;
     cout<<endl<<"T ( step 4 )"<< to_string(T4) <<endl;
     cout<<endl<<"TR"<< to_string(T4*R3) <<endl;
+
+    double x = w/2, y = h/2;
+    vec4 piv = calc_p(x, y, w, h, d);
 
     for (uint y = 0; y < h; ++y) {
         for (uint x = 0; x < w; ++x) {
@@ -121,3 +140,4 @@ void A4_Render(
     }
 
 }
+

@@ -33,3 +33,15 @@ public:
     glm::vec4 o;
     glm::vec4 d;
 };
+
+class Intersection {
+public:
+    Intersection( const Ray &ray, double t, bool hit )
+        : ray( ray ), t( t ), hit( hit ) {}
+    Intersection( const Ray &ray )
+        : ray( ray ), t( -1 ), hit( false ) {}
+public:
+    const Ray &ray;
+    double t;
+    bool hit;
+};
