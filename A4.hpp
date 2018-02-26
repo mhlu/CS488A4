@@ -23,3 +23,13 @@ void A4_Render(
     const glm::vec3 & ambient,
     const std::list<Light *> & lights
 );
+
+class Ray {
+public:
+    Ray( glm::vec4 o, glm::vec4 d ) : o( o ), d( d ){}
+    Ray( glm::vec3 o, glm::vec3 d ) : o( o, 1.0 ), d( d, 1.0 ){}
+
+public:
+    glm::vec4 o;
+    glm::vec4 d;
+};
