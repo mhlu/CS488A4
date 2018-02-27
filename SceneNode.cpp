@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <cassert>
 using namespace std;
 
 #include <glm/glm.hpp>
@@ -133,4 +134,10 @@ std::ostream & operator << (std::ostream & os, const SceneNode & node) {
 
     os << "]\n";
     return os;
+}
+
+//---------------------------------------------------------------------------------------
+Intersection SceneNode::intersect( const Ray &ray ) {
+    assert(false && "should not reach here");
+    return Intersection( ray );
 }

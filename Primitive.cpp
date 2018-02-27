@@ -32,8 +32,8 @@ NonhierSphere::~NonhierSphere() {
 Intersection NonhierSphere::intersect( const Ray &ray ) {
     Intersection i( ray );
 
-    const vec3 a( ray.o );
-    const vec3 b_a( ray.d );
+    const vec3 a( ray.get_origin() );
+    const vec3 b_a( ray.get_dir() );
     const vec3 a_c( a - m_pos );
 
     double A = dot( b_a, b_a );
@@ -68,6 +68,10 @@ Intersection NonhierSphere::intersect( const Ray &ray ) {
             i.hit = false;
         }
     }
+
+    vec4 p = ray.get_origin() + ray.get_dir() * float(i.t);
+    vec4 n = p - vec4(m_pos, 1.0);
+    i.n = n;
 
     return i;
 }

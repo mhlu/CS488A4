@@ -28,9 +28,9 @@ mat4 calc_R( const vec3 &up, const vec3 &look_from, const vec3 &look_at ) {
     vec3 v = normalize( cross(w, u) );
 
     mat4 R({
-        {u.x, v.x, w.x, 0.0},
-        {u.y, v.y, w.y, 0.0},
-        {u.z, v.z, w.z, 0.0},
+        {u.x, u.y, u.z, 0.0},
+        {v.x, v.y, v.y, 0.0},
+        {w.x, w.y, w.z, 0.0},
         {0.0, 0.0, 0.0, 1.0}
     });
 
@@ -39,21 +39,22 @@ mat4 calc_R( const vec3 &up, const vec3 &look_from, const vec3 &look_at ) {
 
 mat4 calc_T( const vec3 &look_from ) {
     mat4 T({
-        {1.0, 0.0, 0.0, look_from.x},
-        {0.0, 1.0, 0.0, look_from.y},
-        {0.0, 0.0, 1.0, look_from.z},
-        {0.0, 0.0, 0.0, 0.0}
+        {1.0, 0.0, 0.0, 0.0},
+        {0.0, 1.0, 0.0, 0.0},
+        {0.0, 0.0, 1.0, 0.0},
+        {look_from.x, look_from.y, look_from.z, 1.0}
     });
     return T;
 }
 
-Ray get_ray(
+Ray calc_ray(
     const double &x, const double &y,
     const double &w, const double &h,
     const mat4 &R, const mat4 &T,
     const double &fov_y, const double &d, const vec3 &look_from ) {
     vec4 p_V = calc_p( x, y, w, h, d );
     vec4 p_W = T * R * p_V;
+
 
     vec4 origin( look_from, 1 );
     Ray r( origin, p_W - origin );
@@ -129,13 +130,56 @@ void A4_Render(
 
     for (uint y = 0; y < h; ++y) {
         for (uint x = 0; x < w; ++x) {
-            // Red: increasing from top to bottom
-            image(x, y, 0) = (double)y / h;
-            // Green: increasing from left to right
-            image(x, y, 1) = (double)x / w;
-            // Blue: in lower-left and upper-right corners
-            image(x, y, 2) = ((y < h/2 && x < w/2)
-                          || (y >= h/2 && x >= w/2)) ? 1.0 : 0.0;
+            Ray r = calc_ray( x, y, w, h, R3, T4, fovy, d, eye );
+
+            vec3 color;
+            Intersection isec = hit(r, root);
+
+            if ( isec.hit ) {
+
+                color = ambient;
+                vec4 p = r.get_origin() + isec.t * r.get_dir();
+
+
+                // cast shadow rays
+                for ( auto light : lights ) {
+                    //cout<<"light position"<<to_string(vec4(light->position, 1))<<endl;
+                    //cout<<"point"<<to_string(p)<<endl;
+                    //cout<<"ray dir"<<to_string( vec4(light->position, 1)-p )<<endl;
+                    Ray shadow_ray = Ray( p, vec4(light->position, 1) - p );
+                    Intersection shadow_isec = hit( shadow_ray, root );
+
+
+                    double dis_to_light = length( light->position - vec3(p) );
+
+                    if ( !shadow_isec.hit
+                            || length( light->position - vec3(shadow_isec.t*shadow_ray.get_dir()) ) > dis_to_light ) {
+                        cout<<"shadow hit"<<endl;
+                        color += light->colour / (light->falloff[0] +
+                                    light->falloff[1] * dis_to_light +
+                                    light->falloff[2] * dis_to_light * dis_to_light);
+                        cout<<"color"<<to_string(color)<<endl;
+                    }
+                }
+
+
+                // this is wrong, need to combine with the below else statement for hit that is invalid
+                // but the seperation right now allows for easier testing
+
+                cout<<"final color"<<to_string(color)<<endl;
+                image(x, y, 0) = color.r;
+                image(x, y, 1) = color.g;
+                image(x, y, 2) = color.b;
+
+            } else {
+                // Red: increasing from top to bottom
+                image(x, y, 0) = (double)y / h;
+                // Green: increasing from left to right
+                image(x, y, 1) = (double)x / w;
+                // Blue: in lower-left and upper-right corners
+                image(x, y, 2) = ((y < h/2 && x < w/2)
+                    || (y >= h/2 && x >= w/2)) ? 1.0 : 0.0;
+           }
         }
     }
 

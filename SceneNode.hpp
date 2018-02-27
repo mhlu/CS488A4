@@ -1,5 +1,6 @@
 #pragma once
 
+#include "A4.hpp"
 #include "Material.hpp"
 
 #include <glm/glm.hpp>
@@ -7,6 +8,9 @@
 #include <list>
 #include <string>
 #include <iostream>
+
+class Intersection;
+class Ray;
 
 enum class NodeType {
     SceneNode,
@@ -19,6 +23,7 @@ public:
     SceneNode(const std::string & name);
 
     SceneNode(const SceneNode & other);
+
 
     virtual ~SceneNode();
 
@@ -40,6 +45,7 @@ public:
 
 
     friend std::ostream & operator << (std::ostream & os, const SceneNode & node);
+    virtual Intersection intersect( const Ray &ray );
 
     // Transformations
     glm::mat4 trans;

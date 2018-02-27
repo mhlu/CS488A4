@@ -10,6 +10,7 @@ public:
         Material *mat = nullptr );
 
     void setMaterial( Material *material );
+    Intersection intersect( const Ray &ray );
 
     Material *m_material;
     Primitive *m_primitive;
