@@ -28,8 +28,8 @@ void GeometryNode::setMaterial( Material *mat )
 
 Intersection GeometryNode::intersect( const Ray &ray ) {
     Intersection i = m_primitive->intersect( ray );
-    if ( i.hit ) {
-        i.phong = (PhongMaterial *)m_material;
+    if ( i.is_hit() ) {
+        i.set_phont( (PhongMaterial *)m_material );
     }
     return i;
 }

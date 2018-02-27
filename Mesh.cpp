@@ -5,6 +5,9 @@
 
 // #include "cs488-framework/ObjFileDecoder.hpp"
 #include "Mesh.hpp"
+using namespace glm;
+
+#include <iostream>
 
 Mesh::Mesh( const std::string& fname )
     : m_vertices()
@@ -45,4 +48,33 @@ std::ostream& operator<<(std::ostream& out, const Mesh& mesh)
 */
   out << "}";
   return out;
+}
+
+Intersection Mesh::intersect( const Ray &ray ) {
+
+    Intersection isec( ray );
+
+    glm::vec3 pos;
+    for (auto face : m_faces) {
+        vec3 o = vec3( ray.get_origin() );
+        vec3 d = vec3( ray.get_dir() );
+        vec3 n = cross(
+                ( m_vertices[face.v3]-m_vertices[face.v1] ),
+                ( m_vertices[face.v2]-m_vertices[face.v1] )
+                );
+
+        bool hit = glm::intersectRayTriangle(o, d,
+             m_vertices[ face.v1 ],
+             m_vertices[ face.v2 ],
+             m_vertices[ face.v3 ],
+             pos);
+
+        if (hit && pos.z > 0) {
+            if (!isec.is_hit() || pos.z < isec.get_t() ) {
+                isec.set_t( pos.z );
+                isec.set_hit( true );
+            }
+        }
+    }
+    return isec;
 }

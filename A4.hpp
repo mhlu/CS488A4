@@ -21,50 +21,63 @@ void A4_Render(
     Image & image,
 
     // Viewing parameters
-    const glm::vec3 & eye,
-    const glm::vec3 & view,
-    const glm::vec3 & up,
+    const glm::dvec3 & eye,
+    const glm::dvec3 & view,
+    const glm::dvec3 & up,
     double fovy,
 
     // Lighting parameters
-    const glm::vec3 & ambient,
+    const glm::dvec3 & ambient,
     const std::list<Light *> & lights
 );
 
 class Ray {
 public:
-    Ray( glm::vec4 o, glm::vec4 d ) {
+    Ray( glm::dvec4 o, glm::dvec4 d ) {
         set_origin( o );
         set_dir( d );
     }
-    Ray( glm::vec3 o, glm::vec3 d )
-        : Ray( glm::vec4(o, 1.0 ), glm::vec4( d, 0.0 ) ){}
-    void set_origin( glm::vec4 o ) { assert( o.w == 1 ); this->o = o; };
-    void set_dir( glm::vec4 d ) { assert( d.w == 0 ); this->d = d; };
-    glm::vec4 get_origin() const { return o; }
-    glm::vec4 get_dir() const { return d; }
+    Ray( glm::dvec3 o, glm::dvec3 d )
+        : Ray( glm::dvec4(o, 1.0 ), glm::dvec4( d, 0.0 ) ){}
+    void set_origin( glm::dvec4 o ) { assert( o.w == 1 ); this->o = o; };
+    void set_dir( glm::dvec4 d ) { assert( d.w == 0 ); this->d = d; };
+    glm::dvec4 get_origin() const { return o; }
+    glm::dvec4 get_dir() const { return d; }
 
 private:
-    glm::vec4 o;
-    glm::vec4 d;
+    glm::dvec4 o;
+    glm::dvec4 d;
 };
 
 class Intersection {
 public:
     Intersection(
         const Ray &ray, double t, bool hit,
-        const PhongMaterial* phong, const glm::vec4 & n )
+        const PhongMaterial* phong, const glm::dvec4 & n )
             : ray( ray ), t( t ), hit( hit ),
               phong( phong ), n( n ) {}
 
         Intersection( const Ray & ray)
             : ray( ray ), phong( phong ),  hit( false ) {}
 
-public:
-    Ray ray;
+    void set_t( double t )                       { this->t = t; }
+    void set_ray( const Ray &ray )               { this->ray = ray; }
+    void set_phont( const PhongMaterial *phong ) { this->phong = phong; }
+    void set_n( const glm::dvec4 &n )             { this->n = n; }
+    void set_hit( bool hit )                     { if( hit ) { assert( this->t > 0 ); } this->hit = hit; }
+
+    double get_t()                   { assert( hit ); return t; }
+    Ray& get_ray()                   { assert( hit ); return ray; }
+    const PhongMaterial* get_phong() { assert( hit ); return phong; }
+    double get_dis()                 { assert( hit ); return glm::length( t * ray.get_dir() ); }
+    glm::dvec4 get_p()               { assert( hit ); return ray.get_origin() + t * ray.get_dir(); }
+    glm::dvec4 get_n()               { assert( hit ); return n; }
+    bool is_hit()                    { return hit; }
+
+private:
     double t;
     bool hit;
-
+    Ray ray;
     const PhongMaterial *phong;
-    glm::vec4 n;
+    glm::dvec4 n;
 };

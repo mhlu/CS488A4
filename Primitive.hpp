@@ -23,7 +23,7 @@ public:
 
 class NonhierSphere : public Primitive {
 public:
-    NonhierSphere(const glm::vec3& pos, double radius)
+    NonhierSphere(const glm::dvec3& pos, double radius)
     : m_pos(pos), m_radius(radius)
     {
     }
@@ -31,13 +31,13 @@ public:
     virtual Intersection intersect( const Ray &ray );
 
 private:
-    glm::vec3 m_pos;
+    glm::dvec3 m_pos;
     double m_radius;
 };
 
 class NonhierBox : public Primitive {
 public:
-    NonhierBox(const glm::vec3& pos, double size)
+    NonhierBox(const glm::dvec3& pos, double size)
     : m_pos(pos), m_size(size)
     {
     }
@@ -46,6 +46,6 @@ public:
     virtual Intersection intersect( const Ray &ray );
 
 private:
-    glm::vec3 m_pos;
+    glm::dvec3 m_pos;
     double m_size;
 };

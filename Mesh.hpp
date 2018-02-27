@@ -24,7 +24,8 @@ struct Triangle
 // A polygonal mesh.
 class Mesh : public Primitive {
 public:
-  Mesh( const std::string& fname );
+    Mesh( const std::string& fname );
+    virtual Intersection intersect( const Ray &ray );
 
 private:
     std::vector<glm::vec3> m_vertices;

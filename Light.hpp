@@ -7,9 +7,9 @@
 // Represents a simple point light.
 struct Light {
   Light();
-  
-  glm::vec3 colour;
-  glm::vec3 position;
+
+  glm::dvec3 colour;
+  glm::dvec3 position;
   double falloff[3];
 };
 
