@@ -177,6 +177,8 @@ void A4_Render(
 
     for (uint y = 0; y < h; ++y) {
         for (uint x = 0; x < w; ++x) {
+            cout<<"\r"<< int(double((y==0?0:y-1)*w+x)/(w*h)*100) <<" percentage done";
+
             Ray ray = calc_ray( x, y, nx, ny, w, h, R3, T4, d, eye );
             bool hit = false;
             auto color = ray_color( ray, root, lights, ambient, hit );
@@ -187,9 +189,9 @@ void A4_Render(
                 image(x, y, 2) = color.b;
 
             } else {
-                image(x, y, 0) = (double)y / h;
-                image(x, y, 1) = (double)x / w;
-                image(x, y, 2) = ((y < h/2 && x < w/2) || (y >= h/2 && x >= w/2)) ? 1.0 : 0.0;
+                image(x, y, 0) = 0.0;
+                image(x, y, 1) = 0.0;
+                image(x, y, 2) = 1.0 - (double)y/(double)h;
            }
         }
     }

@@ -54,27 +54,50 @@ Intersection Mesh::intersect( const Ray &ray ) {
 
     Intersection isec( ray );
 
-    glm::vec3 pos;
+    auto e = dvec3( ray.get_origin() );
+    auto d = dvec3( ray.get_dir() );
     for (auto face : m_faces) {
-        vec3 o = vec3( ray.get_origin() );
-        vec3 d = vec3( ray.get_dir() );
-        vec3 n = cross(
-                ( m_vertices[face.v3]-m_vertices[face.v1] ),
-                ( m_vertices[face.v2]-m_vertices[face.v1] )
-                );
+        const auto &a = dvec3(m_vertices[face.v1]);
+        const auto &b = dvec3(m_vertices[face.v2]);
+        const auto &c = dvec3(m_vertices[face.v3]);
 
-        bool hit = glm::intersectRayTriangle(o, d,
-             m_vertices[ face.v1 ],
-             m_vertices[ face.v2 ],
-             m_vertices[ face.v3 ],
-             pos);
+        double A = determinant(transpose(dmat3(
+            { a.x-b.x, a.x-c.x, d.x },
+            { a.y-b.y, a.y-c.y, d.y },
+            { a.z-b.z, a.z-c.z, d.z }
+        )));
 
-        if (hit && pos.z > 0) {
-            if (!isec.is_hit() || pos.z < isec.get_t() ) {
-                isec.set_t( pos.z );
-                isec.set_hit( true );
-            }
-        }
+        double beta = determinant(transpose(dmat3(
+            { a.x-e.x, a.x-c.x, d.x },
+            { a.y-e.y, a.y-c.y, d.y },
+            { a.z-e.z, a.z-c.z, d.z }
+        ))) / A;
+
+        double gamma = determinant(transpose(dmat3(
+            { a.x-b.x, a.x-e.x, d.x },
+            { a.y-b.y, a.y-e.y, d.y },
+            { a.z-b.z, a.z-e.z, d.z }
+        ))) / A;
+
+        double t = determinant(transpose(dmat3(
+            { a.x-b.x, a.x-c.x, a.x-e.x },
+            { a.y-b.y, a.y-c.y, a.y-e.y },
+            { a.z-b.z, a.z-c.z, a.z-e.z }
+        ))) / A;
+
+        if ( t < gg_epi || (isec.is_hit() && isec.get_t() < t) ) continue;
+        if ( gamma < 0 || gamma > 1 ) continue;
+        if ( beta < 0  || beta > 1-gamma ) continue;
+
+        isec.set_t( t );
+        isec.set_hit( true );
+
+        dvec3 n = cross(b-a, c-a);
+        if ( dot(n, d) > 0 )
+            n = -n;
+        isec.set_n( dvec4(n, 0) );
+
+
     }
     return isec;
 }

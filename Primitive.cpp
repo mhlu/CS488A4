@@ -52,16 +52,16 @@ Intersection NonhierSphere::intersect( const Ray &ray ) {
 
     } else if ( num_roots == 1) { // tangent
         isec.set_t( roots[0] );
-        isec.set_hit( bool( isec.get_t() > 0 ) );
+        isec.set_hit( bool( isec.get_t() > gg_epi ) );
 
     } else if ( num_roots == 2 ) { // enter, leaves sphere, take smallest positive root as t
-        if ( roots[0] > 0 && roots[1] > 0 ) {
+        if ( roots[0] > gg_epi && roots[1] > gg_epi ) {
             isec.set_t( min( roots[0], roots[1] ) );
             isec.set_hit( true );
-        } else if ( roots[0] > 0 ) {
+        } else if ( roots[0] > gg_epi ) {
             isec.set_t( roots[0] );
             isec.set_hit( true );
-        } else if ( roots[1] > 0 ) {
+        } else if ( roots[1] > gg_epi ) {
             isec.set_t( roots[1] );
             isec.set_hit( true );
         } else {
@@ -70,7 +70,7 @@ Intersection NonhierSphere::intersect( const Ray &ray ) {
     }
 
     if ( isec.is_hit() ) {
-        assert( isec.get_t() > 0 );
+        assert( isec.get_t() > gg_epi );
 
         dvec4 p = isec.get_p();
         dvec4 n = p - dvec4(m_pos, 1.0);
@@ -120,14 +120,40 @@ Intersection NonhierBox::intersect( const Ray &ray ) {
     if ( tzmin > tmin ) tmin = tzmin;
     if ( tzmax < tmax ) tmax = tzmax;
 
-    if ( tmin > 0 ) {
+    if ( tmin > gg_epi ) {
         isec.set_t( tmin );
         isec.set_hit( true );
-    } else if ( tmax > 0 ) {
+    } else if ( tmax > gg_epi ) {
         isec.set_t( tmax );
         isec.set_hit( true );
     } else {
         isec.set_hit( false );
+    }
+
+    if ( isec.is_hit() ) {
+        dvec4 p = isec.get_p();
+        if      ( abs(p.x - min.x) < gg_epi && dot( dvec3(-1, 0, 0), d) < gg_epi ) isec.set_n( dvec4(-1, 0, 0, 0) );
+        else if ( abs(p.x - max.x) < gg_epi && dot( dvec3(1, 0, 0), d) < gg_epi ) isec.set_n( dvec4(1, 0, 0, 0) );
+        else if ( abs(p.y - min.y) < gg_epi && dot( dvec3(0, -1, 0), d) < gg_epi ) isec.set_n( dvec4(0, -1, 0, 0) );
+        else if ( abs(p.y - max.y) < gg_epi && dot( dvec3(0, 1, 0), d) < gg_epi ) isec.set_n( dvec4(0, 1, 0, 0) );
+        else if ( abs(p.z - min.z) < gg_epi && dot( dvec3(0, 0, -1), d) < gg_epi ) isec.set_n( dvec4(0, 0, -1, 0) );
+        else if ( abs(p.z - max.z) < gg_epi && dot( dvec3(0, 0, 1), d) < gg_epi ) isec.set_n( dvec4(0, 0, 1, 0) );
+        else {
+            std::cout<<"cube edge(literal edge) case"<<std::endl;
+            std::cout<<"cube edge(literal edge) case"<<std::endl;
+            std::cout<<"cube edge(literal edge) case"<<std::endl;
+            std::cout<<"cube edge(literal edge) case"<<std::endl;
+            std::cout<<"cube edge(literal edge) case"<<std::endl;
+            isec.set_hit( false );
+        }
+
+        //if ( dot(isec.get_n(), dvec4(d, 0)) > gg_epi ) {
+            //std::cout<<std::endl<<"trouble at: "<<p.x<<" "<<p.y<<" "<<p.z<<" "<<p.w<<" with norm dot "<<dot(isec.get_n(), dvec4(d, 0))<<std::endl;
+            //std::cout<<"where near"<<min.x<<" "<<min.y<<" "<<min.z<<"\n";
+            //std::cout<<"where far"<<max.x<<" "<<max.y<<" "<<max.z<<"\n";
+            //isec.set_n( -isec.get_n() );
+        //}
+
     }
 
 

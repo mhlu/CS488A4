@@ -13,6 +13,8 @@ class SceneNode;
 class Light;
 class PhongMaterial;
 
+const double gg_epi = 1e-5;
+
 void A4_Render(
     // What to render
     SceneNode * root,
@@ -40,9 +42,9 @@ public:
     Ray( glm::dvec3 o, glm::dvec3 d )
         : Ray( glm::dvec4(o, 1.0 ), glm::dvec4( d, 0.0 ) ){}
     void set_origin( glm::dvec4 o ) { assert( o.w == 1 ); this->o = o; };
-    void set_dir( glm::dvec4 d ) { assert( d.w == 0 ); this->d = d; };
-    glm::dvec4 get_origin() const { return o; }
-    glm::dvec4 get_dir() const { return d; }
+    void set_dir( glm::dvec4 d )    { assert( d.w == 0 ); this->d = glm::normalize(d); };
+    glm::dvec4 get_origin() const   { return o; }
+    glm::dvec4 get_dir() const      { return d; }
 
 private:
     glm::dvec4 o;
@@ -63,8 +65,8 @@ public:
     void set_t( double t )                       { this->t = t; }
     void set_ray( const Ray &ray )               { this->ray = ray; }
     void set_phont( const PhongMaterial *phong ) { this->phong = phong; }
-    void set_n( const glm::dvec4 &n )             { this->n = n; }
-    void set_hit( bool hit )                     { if( hit ) { assert( this->t > 0 ); } this->hit = hit; }
+    void set_n( const glm::dvec4 &n )            { assert( n.w == 0); this->n = normalize(n); }
+    void set_hit( bool hit )                     { if( hit ) { assert( this->t > gg_epi ); } this->hit = hit; }
 
     double get_t()                   { assert( hit ); return t; }
     Ray& get_ray()                   { assert( hit ); return ray; }
