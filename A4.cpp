@@ -83,43 +83,59 @@ Intersection check_hit( const Ray &ray, SceneNode *root ) {
     return isec;
 }
 
-dvec3 ray_color(
-        const Ray &ray, SceneNode *root, const list<Light*> &lights,
-        const dvec3 &ambient, bool &hit ) {
 
-    Intersection isec = check_hit( ray, root );
-    auto color = ambient;
-    if ( !isec.is_hit() ) {
-        hit = false;
-        return color;
+dvec3 directed_light( const Intersection &isec, SceneNode *root, const list<Light*> &lights, const dvec3 &ambient ) {
 
-    }
-    dvec4 isec_p = isec.get_p();
+    auto kd = isec.get_phong()->m_kd;
+    auto ks = isec.get_phong()->m_ks;
+    auto p = isec.get_phong()->m_shininess;
 
+    auto ray_out  = isec.get_dir();
+    auto normal  = isec.get_n();
+    auto isec_p = isec.get_p();
 
+    dvec3 color = kd * ambient;
+    for (auto light : lights) {
 
-    // cast shadow rays
-    for ( auto light : lights ) {
         Ray shadow_ray = Ray( isec_p, dvec4(light->position, 1) - isec_p );
-        Intersection shadow_isec = check_hit( shadow_ray, root );
-
-
         double dis_to_light = length( light->position - dvec3(isec_p) );
 
-        if ( !shadow_isec.is_hit() || shadow_isec.get_dis() > dis_to_light ) {
-        // if wasn't blocked by another object
+        Intersection shadow_isec = check_hit(shadow_ray, root);
+        if ( !shadow_isec.is_hit() || shadow_isec.get_dis() > dis_to_light) {
 
-            dvec3 kd = isec.get_phong()->m_kd;
-            color += kd * light->colour / (light->falloff[0] +
-                             light->falloff[1] * dis_to_light +
-                             light->falloff[2] * dis_to_light * dis_to_light);
+            auto ray = shadow_ray.get_dir();
+            auto normal = isec.get_n();
+            auto cos_theta_in = glm::max(dot(normal, ray), 0.0);
+            color += kd * cos_theta_in * light->colour / (light->falloff[0] +
+              light->falloff[1] * dis_to_light +
+              light->falloff[2] * dis_to_light * dis_to_light);
 
+            glm::dvec4 R = ray_out - 2.0 * normal * (glm::dot(ray_out, normal));
+            auto pec = pow( glm::max( dot(R, ray), 0.0 ), p );
+            //color += pec * ks * light->colour;
+            color += pec * ks * light->colour / (light->falloff[0] +
+              light->falloff[1] * dis_to_light +
+              light->falloff[2] * dis_to_light * dis_to_light);
         }
+
+    }
+    return color;
+}
+
+dvec3 ray_color(
+        const Ray &ray, SceneNode *root, const list<Light*> &lights,
+        const dvec3 &ambient, bool &reach_light ) {
+
+    Intersection isec = check_hit( ray, root );
+    if ( isec.is_hit() ) {
+        reach_light = true;
+        dvec3 color( 0, 0, 0 );
+        color += directed_light( isec, root, lights, ambient );
+        return color;
     }
 
-    hit = true;
-    return color;
-
+    reach_light = false;
+    return dvec3(0.0, 0.0, 0.0);
 }
 
 void A4_Render(
@@ -180,10 +196,10 @@ void A4_Render(
             cout<<"\r"<< int(double((y==0?0:y-1)*w+x)/(w*h)*100) <<" percentage done";
 
             Ray ray = calc_ray( x, y, nx, ny, w, h, R3, T4, d, eye );
-            bool hit = false;
-            auto color = ray_color( ray, root, lights, ambient, hit );
+            bool reach_light = false;
+            auto color = ray_color( ray, root, lights, ambient, reach_light );
 
-            if ( hit ) {
+            if ( reach_light ) {
                 image(x, y, 0) = color.r;
                 image(x, y, 1) = color.g;
                 image(x, y, 2) = color.b;
@@ -191,7 +207,7 @@ void A4_Render(
             } else {
                 image(x, y, 0) = 0.0;
                 image(x, y, 1) = 0.0;
-                image(x, y, 2) = 1.0 - (double)y/(double)h;
+                image(x, y, 2) = (double)y/(double)h;
            }
         }
     }

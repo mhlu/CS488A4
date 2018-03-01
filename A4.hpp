@@ -68,13 +68,15 @@ public:
     void set_n( const glm::dvec4 &n )            { assert( n.w == 0); this->n = normalize(n); }
     void set_hit( bool hit )                     { if( hit ) { assert( this->t > gg_epi ); } this->hit = hit; }
 
-    double get_t()                   { assert( hit ); return t; }
-    Ray& get_ray()                   { assert( hit ); return ray; }
-    const PhongMaterial* get_phong() { assert( hit ); return phong; }
-    double get_dis()                 { assert( hit ); return glm::length( t * ray.get_dir() ); }
-    glm::dvec4 get_p()               { assert( hit ); return ray.get_origin() + t * ray.get_dir(); }
-    glm::dvec4 get_n()               { assert( hit ); return n; }
-    bool is_hit()                    { return hit; }
+    double get_t() const             { assert( hit ); return t; }
+    Ray get_ray() const             { assert( hit ); return ray; }
+    const PhongMaterial* get_phong() const { assert( hit ); return phong; }
+    double get_dis() const           { assert( hit ); return glm::length( t * ray.get_dir() ); }
+    glm::dvec4 get_p() const         { assert( hit ); return ray.get_origin() + t * ray.get_dir(); }
+    glm::dvec4 get_n() const         { assert( hit ); return n; }
+    bool is_hit() const              { return hit; }
+    glm::dvec4 get_dir() const       { return this->ray.get_dir(); }
+    glm::dvec4 get_origin() const    { return this->ray.get_origin(); }
 
 private:
     double t;

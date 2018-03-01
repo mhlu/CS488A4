@@ -14,20 +14,28 @@ Intersection Primitive::intersect( const Ray &ray ) {
     return i;
 }
 
+Sphere::Sphere() {
+    m_obj = new NonhierSphere({0.0, 0.0, 0.0}, 1.0};
+}
+
 Sphere::~Sphere() {
+    delete m_obj;
 }
 
 Intersection Sphere::intersect( const Ray &ray ) {
-    Intersection i( ray );
-    return i;
+    return m_obj -> intersect( ray );
+}
+
+Cube::Cube() {
+    m_obj = new NonhierBox({0.0, 0.0, 0.0}, 1.0);
 }
 
 Cube::~Cube() {
+    delete m_obj;
 }
 
 Intersection Cube::intersect( const Ray &ray ) {
-    Intersection i( ray );
-    return i;
+    return m_obj -> intersect( ray );
 }
 
 NonhierSphere::~NonhierSphere() {
@@ -146,16 +154,7 @@ Intersection NonhierBox::intersect( const Ray &ray ) {
             std::cout<<"cube edge(literal edge) case"<<std::endl;
             isec.set_hit( false );
         }
-
-        //if ( dot(isec.get_n(), dvec4(d, 0)) > gg_epi ) {
-            //std::cout<<std::endl<<"trouble at: "<<p.x<<" "<<p.y<<" "<<p.z<<" "<<p.w<<" with norm dot "<<dot(isec.get_n(), dvec4(d, 0))<<std::endl;
-            //std::cout<<"where near"<<min.x<<" "<<min.y<<" "<<min.z<<"\n";
-            //std::cout<<"where far"<<max.x<<" "<<max.y<<" "<<max.z<<"\n";
-            //isec.set_n( -isec.get_n() );
-        //}
-
     }
-
 
     return isec;
 }
