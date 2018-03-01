@@ -136,8 +136,25 @@ std::ostream & operator << (std::ostream & os, const SceneNode & node) {
     return os;
 }
 
-//---------------------------------------------------------------------------------------
-Intersection SceneNode::intersect( const Ray &ray ) {
-    assert(false && "should not reach here");
-    return Intersection( ray );
+Intersection SceneNode::intersect(const Ray & ray) {
+    auto origin = invtrans * ray.get_origin();
+    auto dir    = invtrans * ray.get_dir();
+
+    Intersection isec( ray );
+    Ray transformed_ray( origin, dir );
+
+    for (auto child : children) {
+        Intersection new_isec = child->intersect( transformed_ray );
+        if ( new_isec.is_hit() && ( !isec.is_hit() || new_isec.get_t() < isec.get_t() ) ) {
+            isec = new_isec;
+        }
+    }
+
+    if ( isec.is_hit() ) {
+        auto normal = dvec3( isec.get_n() );
+        auto invtrans3 = dmat3(invtrans);
+        isec.set_n( dvec4( transpose(invtrans3) * normal, 0.0) );
+    }
+
+    return isec;
 }

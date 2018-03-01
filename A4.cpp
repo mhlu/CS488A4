@@ -67,20 +67,21 @@ Ray calc_ray(
 }
 
 Intersection check_hit( const Ray &ray, SceneNode *root ) {
-    Intersection isec( ray );
-    assert( !isec.is_hit() );
-    for ( auto node : root->children ) {
-        if ( node->m_nodeType == NodeType::GeometryNode ) {
+    //Intersection isec( ray );
+    //assert( !isec.is_hit() );
+    //for ( auto node : root->children ) {
+        //if ( node->m_nodeType == NodeType::GeometryNode ) {
 
-            Intersection new_isec = node->intersect( ray );
-            if ( new_isec.is_hit() && ( !isec.is_hit() || new_isec.get_t() < isec.get_t() ) ) {
-                assert( new_isec.get_t() > 0 );
-                isec = new_isec;
-            }
-        }
+            //Intersection new_isec = node->intersect( ray );
+            //if ( new_isec.is_hit() && ( !isec.is_hit() || new_isec.get_t() < isec.get_t() ) ) {
+                //assert( new_isec.get_t() > 0 );
+                //isec = new_isec;
+            //}
+        //}
 
-    }
-    return isec;
+    //}
+    //return isec;
+    return root->intersect( ray );
 }
 
 

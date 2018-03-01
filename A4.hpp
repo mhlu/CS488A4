@@ -13,7 +13,7 @@ class SceneNode;
 class Light;
 class PhongMaterial;
 
-const double gg_epi = 1e-5;
+const double gg_epi = 1e-4;
 
 void A4_Render(
     // What to render
@@ -64,7 +64,7 @@ public:
 
     void set_t( double t )                       { this->t = t; }
     void set_ray( const Ray &ray )               { this->ray = ray; }
-    void set_phont( const PhongMaterial *phong ) { this->phong = phong; }
+    void set_phong( const PhongMaterial *phong ) { this->phong = phong; }
     void set_n( const glm::dvec4 &n )            { assert( n.w == 0); this->n = normalize(n); }
     void set_hit( bool hit )                     { if( hit ) { assert( this->t > gg_epi ); } this->hit = hit; }
 

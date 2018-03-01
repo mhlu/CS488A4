@@ -17,16 +17,30 @@ Mesh::Mesh( const std::string& fname )
     double vx, vy, vz;
     size_t s1, s2, s3;
 
+    double min_x = 100000000, min_y = 100000000, min_z = 100000000;
+    double max_x = -100000000, max_y = -100000000, max_z = -100000000;
+
     std::ifstream ifs( fname.c_str() );
     while( ifs >> code ) {
         if( code == "v" ) {
             ifs >> vx >> vy >> vz;
+
+            min_x = glm::min( min_x, vx );
+            min_y = glm::min( min_y, vy );
+            min_z = glm::min( min_z, vz );
+
+            max_x = glm::max( max_x, vx );
+            max_y = glm::max( max_y, vy );
+            max_z = glm::max( max_z, vz );
+
             m_vertices.push_back( glm::vec3( vx, vy, vz ) );
         } else if( code == "f" ) {
             ifs >> s1 >> s2 >> s3;
             m_faces.push_back( Triangle( s1 - 1, s2 - 1, s3 - 1 ) );
         }
     }
+
+    m_bounding = new NonhierBox( dvec3(min_x, min_y, min_z), max_x-min_x, max_y-min_y, max_z-min_z);
 }
 
 std::ostream& operator<<(std::ostream& out, const Mesh& mesh)
@@ -51,6 +65,15 @@ std::ostream& operator<<(std::ostream& out, const Mesh& mesh)
 }
 
 Intersection Mesh::intersect( const Ray &ray ) {
+
+    Intersection isec_b = m_bounding->intersect( ray );
+    if ( !isec_b.is_hit() )
+        return isec_b;
+
+// hit, but draw bounding instead
+#ifdef BOUNDING
+        return isec_b;
+#endif
 
     Intersection isec( ray );
 
@@ -100,4 +123,8 @@ Intersection Mesh::intersect( const Ray &ray ) {
 
     }
     return isec;
+}
+
+Mesh::~Mesh () {
+    delete m_bounding;
 }

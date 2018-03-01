@@ -15,7 +15,7 @@ Intersection Primitive::intersect( const Ray &ray ) {
 }
 
 Sphere::Sphere() {
-    m_obj = new NonhierSphere({0.0, 0.0, 0.0}, 1.0};
+    m_obj = new NonhierSphere({0.0, 0.0, 0.0}, 1.0);
 }
 
 Sphere::~Sphere() {
@@ -96,7 +96,7 @@ Intersection NonhierBox::intersect( const Ray &ray ) {
     Intersection isec( ray );
 
     dvec3 min = m_pos;
-    dvec3 max = m_pos + m_size*dvec3(1, 1, 1);
+    dvec3 max = m_pos + dvec3(size_x, size_y, size_z);
     dvec3 o( ray.get_origin() );
     dvec3 d( ray.get_dir() );
 
@@ -147,11 +147,11 @@ Intersection NonhierBox::intersect( const Ray &ray ) {
         else if ( abs(p.z - min.z) < gg_epi && dot( dvec3(0, 0, -1), d) < gg_epi ) isec.set_n( dvec4(0, 0, -1, 0) );
         else if ( abs(p.z - max.z) < gg_epi && dot( dvec3(0, 0, 1), d) < gg_epi ) isec.set_n( dvec4(0, 0, 1, 0) );
         else {
-            std::cout<<"cube edge(literal edge) case"<<std::endl;
-            std::cout<<"cube edge(literal edge) case"<<std::endl;
-            std::cout<<"cube edge(literal edge) case"<<std::endl;
-            std::cout<<"cube edge(literal edge) case"<<std::endl;
-            std::cout<<"cube edge(literal edge) case"<<std::endl;
+            //std::cout<<"cube edge(literal edge) case"<<std::endl;
+            //std::cout<<"cube edge(literal edge) case"<<std::endl;
+            //std::cout<<"cube edge(literal edge) case"<<std::endl;
+            //std::cout<<"cube edge(literal edge) case"<<std::endl;
+            //std::cout<<"cube edge(literal edge) case"<<std::endl;
             isec.set_hit( false );
         }
     }

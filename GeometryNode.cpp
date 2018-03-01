@@ -1,4 +1,7 @@
 #include "GeometryNode.hpp"
+#include <iostream>
+#include <glm/ext.hpp>
+using namespace glm;
 
 //---------------------------------------------------------------------------------------
 GeometryNode::GeometryNode(
@@ -27,9 +30,30 @@ void GeometryNode::setMaterial( Material *mat )
 }
 
 Intersection GeometryNode::intersect( const Ray &ray ) {
-    Intersection i = m_primitive->intersect( ray );
-    if ( i.is_hit() ) {
-        i.set_phont( (PhongMaterial *)m_material );
+    //std::cout<<glm::to_string(invtrans)<<std::endl;
+    auto origin = invtrans * ray.get_origin();
+    auto dir    = invtrans * ray.get_dir();
+
+    Ray transformed_ray(origin, dir);
+
+    Intersection isec = m_primitive->intersect( transformed_ray );
+    if ( isec.is_hit() ) {
+        isec.set_phong( (PhongMaterial *)m_material );
     }
-    return i;
+
+
+    for (auto child : children) {
+        Intersection new_isec = child->intersect( transformed_ray );
+        if ( new_isec.is_hit() && ( !isec.is_hit() || new_isec.get_t() < isec.get_t() ) ) {
+            isec = new_isec;
+        }
+    }
+
+    if (isec.is_hit()) {
+        auto normal = dvec3( isec.get_n() );
+        auto invtrans3 = glm::dmat3(invtrans);
+
+        isec.set_n( dvec4(glm::transpose(invtrans3) * normal, 0.0) );
+    }
+    return isec;
 }

@@ -49,7 +49,7 @@ end
 buildOptions = {"-std=c++11"}
 
 solution "CS488-Projects"
-    configurations { "Debug", "Release" }
+    configurations { "Debug", "Release", "Bounding" }
 
     project "A4"
         kind "ConsoleApp"
@@ -71,3 +71,7 @@ solution "CS488-Projects"
     configuration "Release"
         defines { "NDEBUG" }
         flags { "Optimize" }
+
+    configuration "Bounding"
+        defines { "DEBUG", "BOUNDING" }
+        flags { "Symbols" }

@@ -25,11 +25,13 @@ struct Triangle
 class Mesh : public Primitive {
 public:
     Mesh( const std::string& fname );
+    virtual ~Mesh();
     virtual Intersection intersect( const Ray &ray );
 
 private:
     std::vector<glm::vec3> m_vertices;
     std::vector<Triangle> m_faces;
+    NonhierBox *m_bounding;
 
     friend std::ostream& operator<<(std::ostream& out, const Mesh& mesh);
 };
